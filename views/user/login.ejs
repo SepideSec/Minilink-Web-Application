@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Login - MiniLink</title>
+		<link
+			href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+			rel="stylesheet"
+		/>
+		<style>
+			@import url('https://fonts.cdnfonts.com/css/playpen-sans');
+
+			/* Custom styling */
+			body {
+				background-color: black;
+				font-family: 'Playpen Sans', sans-serif;
+			}
+
+			/* New styling for centering */
+			.main-content {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				width: 100%;
+				max-width: 500px;
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body class="min-h-screen flex flex-col">
+		<!-- Navbar -->
+		
+
+		<!-- Main Content -->
+		<main
+			class="container mx-auto flex-grow flex justify-center items-center"
+		>
+			<div class="main-content">
+				<h1 class="text-3xl font-bold text-white mb-4">Login</h1>
+				<form action="/login" method="POST" class="w-full">
+					<div class="mb-4">
+						<input
+							type="text"
+							name="username"
+							placeholder="Username"
+							class="appearance-none bg-transparent border-2 border-blue-500 w-full text-white py-2 px-4 leading-tight rounded focus:outline-none"
+						/>
+					</div>
+					<div class="mb-4">
+						<input
+							type="password"
+							name="password"
+							placeholder="Password"
+							class="appearance-none bg-transparent border-2 border-blue-500 w-full text-white py-2 px-4 leading-tight rounded focus:outline-none"
+						/>
+					</div>
+					<button
+						type="submit"
+						class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-6 rounded focus:outline-none w-full mb-4"
+					>
+						Login
+					</button>
+					<!-- Register Link -->
+					<p class="text-white">
+						Don't have an account?
+						<a
+							href="/register"
+							class="text-blue-400 hover:text-blue-600"
+						>
+							Register here
+						</a>
+
+						Forget Password?
+						<a
+							href="/forget"
+							class="text-blue-400 hover:text-blue-600"
+						>
+							Reset
+						</a>
+					</p>
+				</form>
+			</div>
+		</main>
+	</body>
+</html>
