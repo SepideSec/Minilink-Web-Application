@@ -1,12 +1,21 @@
 const express = require('express')
 const sequelize = require('./db')
 const { DataTypes, Op } = require('sequelize')
+const session = require('express-session')
 
 const app = express()
 const port = 3000
 
 app.set('view engine', 'ejs')
 app.use(express.urlencoded({ extended: true }))
+app.use(
+    session({
+        secret: 'mysecretkey',
+        resave: false,
+        saveUninitialized: true,
+        cookie: {maxAge: 3600000}
+    })
+)
 
 const User = sequelize.define(
     'User',
@@ -45,6 +54,7 @@ sequelize
     });
 
 app.get('/', (req, res) => {
+    // console.log(req.session)
     res.render('index')
 })
 
@@ -64,9 +74,10 @@ app.post('/login', async(req, res) => {
         res.send ({message: 'User doesn\'n exist!'})
         return
     }
-    
-    if (password == exists_user.password) {
 
+    if (password == exists_user.password) {
+        req.session.user = username
+        res.redirect('/')
     } else {
         res.send ({message: 'Password is incorrect!'})
     }
