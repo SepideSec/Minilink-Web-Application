@@ -1,6 +1,6 @@
 const express = require('express')
 const sequelize = require('./db')
-const { DataTypes } = require('sequelize')
+const { DataTypes, Op } = require('sequelize')
 
 const app = express()
 const port = 3000
@@ -52,6 +52,26 @@ app.get('/login', (req, res) => {
     res.render('user/login')
 })
 
+app.post('/login', async(req, res) => {
+    const {username, password} = req.body
+    const exists_user = await User.findOne ({
+        where: {
+            username
+        }
+    })
+
+    if (!exists_user) {
+        res.send ({message: 'User doesn\'n exist!'})
+        return
+    }
+    
+    if (password == exists_user.password) {
+
+    } else {
+        res.send ({message: 'Password is incorrect!'})
+    }
+})
+
 app.get('/register', (req, res) => {
     res.render('user/register')
 })
@@ -59,16 +79,27 @@ app.get('/register', (req, res) => {
 app.post('/register', async (req, res) => {
     const { username, email, password, confirm_password } = req.body
     //const password = req.body.password -> it's the same as the above line. 
+    const exists_user = await User.findOne ({ //to avoid the ORM error.
+        where: {
+            [Op.or]: [{ username }, { email }]
+        }
+    })
+
+    if (exists_user) {
+        res.send({ message: 'Duplicate email/username, please try another one!'})        
+    }
+    
     if (password !== confirm_password) {
-        res.send({ message: 'error' });
+        res.send({ message: 'Password doesn\'t match, check it again!' });
         return;
     }
-    const user = await User.create({
+
+    await User.create({
         username,
         email,
         password
     });
-    res.send({ user })
+    res.redirect('/')
 })
 
 app.listen(port, () => {
