@@ -2,6 +2,7 @@ const express = require('express')
 const sequelize = require('./db')
 const { DataTypes, Op } = require('sequelize')
 const session = require('express-session')
+const { isAuthenticated } = require ('./middlewares/auth.middleware')
 
 const app = express()
 const port = 3000
@@ -111,6 +112,59 @@ app.post('/register', async (req, res) => {
         password
     });
     res.redirect('/')
+})
+
+app.get('/profile', isAuthenticated, async (req, res) => { //If doesn't have user session, can not see profile page.
+    const user = await User.findOne({
+        where: {
+            username: req.session.user
+        }
+    })
+    res.render('user/profile', {username: user.username, email:user.email})
+})
+
+app.post('/profile', isAuthenticated, async (req, res) => {
+    const { username, email, password } = req.body
+    const user = await User.findOne({
+        where: {
+            username: req.session.user
+        }
+    })
+    // to check if the updated username and email are not exist in the database.
+    if (username) {
+        const exists_user = await User.findOne({
+            where: {
+                username
+            }
+        })
+        if (exists_user) {
+            res.redirect('/profile')
+        } else {
+            user.username = username
+            req.session.user = username
+        }
+    }
+
+    if (email) {
+        const exists_user = await User.findOne({
+            where: {
+                email
+            }
+        })
+        if (exists_user) {
+            res.redirect('/profile')
+        } else {
+            user.email = email
+        }
+    }
+
+    if (password) {
+        user.password = password
+    }
+
+    user.save()
+
+    res.render('user/profile', {username: user.username, email: user.email})
 })
 
 app.listen(port, () => {
