@@ -102,7 +102,7 @@ app.get('/register', (req, res) => {
     res.render('user/register')
 })
 
-app.post('/register', async (req, res) => {
+app.post('/register', async(req, res) => {
     const { username, email, password, confirm_password } = req.body
     //const password = req.body.password -> it's the same as the above line. 
     const exists_user = await User.findOne ({ //to avoid the ORM error.
@@ -128,7 +128,7 @@ app.post('/register', async (req, res) => {
     res.redirect('/')
 })
 
-app.get('/profile', isAuthenticated, async (req, res) => { //If doesn't have user session, can not see profile page.
+app.get('/profile', isAuthenticated, async(req, res) => { //If doesn't have user session, can not see profile page.
     const user = await User.findOne({
         where: {
             username: req.session.user
@@ -186,7 +186,7 @@ function generateUniqueString(length = 5) {
     return crypto.randomBytes(length).toString('base64').slice(0, length)
 }
 
-app.post('/', async (req, res) => {
+app.post('/', async(req, res) => {
     const { original_url } = req.body
 
     const key = generateUniqueString()
@@ -195,8 +195,20 @@ app.post('/', async (req, res) => {
         url: original_url,
         key
     })
-
     res.render('index', { key })
+})
+
+app.get('/u/:key', async(req, res) => {
+    const url = await ShortUrl.findOne({        
+        where: {
+            key: req.params.key
+        }
+    })
+    if (url) {
+        res.redirect(url.url)
+    } else {
+        res.redirect('/')
+    }
 })
 
 app.listen(port, () => {
