@@ -186,6 +186,21 @@ function generateUniqueString(length = 5) {
     return crypto.randomBytes(length).toString('base64').slice(0, length)
 }
 
+function generateRandomString(length) {
+	const characters =
+		'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	let result = '';
+	const charactersLength = characters.length;
+
+	for (let i = 0; i < length; i++) {
+		result += characters.charAt(
+			Math.floor(Math.random() * charactersLength)
+		);
+	}
+
+	return result;
+}
+
 app.post('/', async(req, res) => {
     const { original_url } = req.body
 
@@ -209,6 +224,30 @@ app.get('/u/:key', async(req, res) => {
     } else {
         res.redirect('/')
     }
+})
+
+app.get('/forget', (req, res) => {
+    res.render('user/forget', { message: '' })
+})
+
+app.post('/forget', async (req, res) => {
+    const { username } = req.body
+    const randomString = generateRandomString(20)
+    
+    const user = await User.findOne({
+        where: {
+            username: username
+        }
+    })
+
+    if (user) {
+        user.forget_pass = randomString
+		console.log(`http://localhost:3000/forget/${randomString}`)
+
+        user.save()
+    }
+
+    res.render('user/forget', { message:'We sent a link to your email. Check and click on it.' })
 })
 
 app.listen(port, () => {
