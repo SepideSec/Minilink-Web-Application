@@ -70,7 +70,7 @@ sequelize
 
 app.get('/', (req, res) => {
     // console.log(req.session)
-    res.render('index')
+    res.render('index', { key: '' })
 })
 
 app.get('/login', (req, res) => {
