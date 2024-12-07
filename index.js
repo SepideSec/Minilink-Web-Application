@@ -3,6 +3,7 @@ const sequelize = require('./db')
 const { DataTypes, Op } = require('sequelize')
 const session = require('express-session')
 const { isAuthenticated } = require ('./middlewares/auth.middleware')
+const crypto = require ('crypto')
 
 const app = express()
 const port = 3000
@@ -19,8 +20,7 @@ app.use(
 )
 
 const User = sequelize.define(
-    'User',
-    {
+    'User', {
         username: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -42,6 +42,20 @@ const User = sequelize.define(
     },
     {
         timestamps: true
+    }
+)
+
+const ShortUrl = sequelize.define(
+    'ShortUrl', {
+        url: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        key: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: true
+        }
     }
 )
 
@@ -165,6 +179,24 @@ app.post('/profile', isAuthenticated, async (req, res) => {
     user.save()
 
     res.render('user/profile', {username: user.username, email: user.email})
+})
+
+//to generate unique 5 characters
+function generateUniqueString(length = 5) {
+    return crypto.randomBytes(length).toString('base64').slice(0, length)
+}
+
+app.post('/', async (req, res) => {
+    const { original_url } = req.body
+
+    const key = generateUniqueString()
+
+    const ShortURL = ShortUrl.create({
+        url: original_url,
+        key
+    })
+
+    res.render('index', { key })
 })
 
 app.listen(port, () => {
