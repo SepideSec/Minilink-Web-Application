@@ -57,6 +57,14 @@
                     </button>
                 </div>
             </form>
+            <% if (key) { %>
+                <div id="shortened-url-message" class="text-white mt-4">
+                    Your shortened URL is:
+                    <span id="shortened-url" class="font-bold">
+                        <a href="http://localtest.me/<%= key %>">localtest.me/u/<%= key %></a>
+                    </span>
+                </div>
+            <% } %>
         </div>
     </main>
 </body>
