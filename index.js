@@ -250,6 +250,33 @@ app.post('/forget', async (req, res) => {
     res.render('user/forget', { message:'We sent a link to your email. Check and click on it.' })
 })
 
+app.get('/forget/:forget_key', (req, res) => {
+    res.render('user/reset-password', { message: '' })
+})
+
+app.post('/forget/:forget_key', async(req, res) => {
+    const { password, confirm_password } = req.body
+
+    if (password == confirm_password) {
+        const user = await User.findOne({
+            where: {
+                forget_pass: req.params.forget_key
+            }
+        })
+
+        if (user) {
+        user.password = password
+        user.save()
+
+        res.render('user/reset-password', { message: 'Your account password updated!'})
+    } else{
+        res.redirect('/login')
+    }
+} else {
+    res.render('user/reset-password', { message: 'Password mismatched, check it again.'})
+}
+})
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
