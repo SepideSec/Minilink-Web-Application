@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Link History - MiniLink</title>
+		<link
+			href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+			rel="stylesheet"
+		/>
+		<link
+			href="https://fonts.cdnfonts.com/css/playpen-sans"
+			rel="stylesheet"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+		/>
+
+		<style>
+			body {
+				font-family: 'Playpen Sans', sans-serif;
+			}
+
+			.w-custom {
+				width: 10%;
+			}
+		</style>
+	</head>
+	<body class="min-h-screen flex flex-col bg-black text-white">
+		<!-- Navbar -->
+		<nav class="p-6 bg-black flex justify-between items-center">
+			<a href="/" class="text-2xl font-bold">MiniLink</a>
+			<div>
+				<a href="/" class="mr-6">Home</a>
+				<a href="/history" class="mr-6">History</a>
+				<a href="/profile">Profile</a>
+			</div>
+		</nav>
+
+		<!-- Main Content -->
+		<main class="container mx-auto flex-grow text-center">
+			<h1 class="text-3xl font-bold mb-4">Your Links</h1>
+
+			<!-- Table -->
+			<div class="overflow-x-auto">
+				<table
+					class="min-w-full table-auto border-collapse border border-blue-500"
+				>
+					<thead>
+						<tr>
+							<th class="p-4 border border-blue-500 w-custom">
+								ID
+							</th>
+							<th class="p-4 border border-blue-500 w-custom">
+								Date
+							</th>
+							<!-- Adjusted width -->
+							<th class="p-4 border border-blue-500 w-8/12">
+								Original Link
+							</th>
+							<th class="p-4 border border-blue-500">
+								Shortened Link
+							</th>
+							<th class="p-4 border border-blue-500">Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						<% for(let i = 0; i < items.length; i++) { %>
+						<tr>
+							<td class="p-4 border border-blue-500">
+								<%= items[i]['id'] %>
+							</td>
+							<td class="p-4 border border-blue-500">
+								<%= items[i]['createdAt'] %>
+							</td>
+							<!-- Adjusted width -->
+							<td
+								class="p-4 border border-blue-500 overflow-auto max-w-xs"
+							>
+								<a
+									href="<%= items[i]['url'] %>"
+									class="text-white hover:underline"
+									><%= items[i]['url'] %></a
+								>
+							</td>
+							<td class="p-4 border border-blue-500">
+								<a
+									href="http://localhost:3000/u/<%= items[i]['key'] %>"
+									class="text-white hover:underline"
+									>http://localhost:3000/u/<%= items[i]['key']
+									%></a
+								>
+							</td>
+							<td class="p-4 border border-blue-500">
+								<!-- Delete button -->
+								<button
+									class="delete-btn"
+									onclick="deleteRow(this)"
+								>
+									<i
+										class="fa fa-trash-o"
+										style="font-size: 25px; color: white"
+									></i>
+								</button>
+							</td>
+						</tr>
+
+						<% } %>
+					</tbody>
+				</table>
+			</div>
+		</main>
+
+		<script>
+			function deleteRow(button) {
+				// Get the row containing the button
+				const row = button.closest('tr');
+				const id = row.querySelector('td:first-child').innerText;
+
+				fetch(`/history/${id}`, {
+					method: 'DELETE',
+				})
+					.then((response) => response.json())
+					.then((data) => {
+						if (data.message === 'Item deleted successfully') {
+							// Remove the row from the table
+							row.remove();
+						} else {
+							alert('Failed to delete item: ' + data.message);
+						}
+					})
+					.catch((error) => {
+						console.error('Error deleting item:', error);
+					});
+			}
+		</script>
+	</body>
+</html>

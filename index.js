@@ -1,9 +1,10 @@
 const express = require('express')
 const sequelize = require('./db')
-const { DataTypes, Op } = require('sequelize')
+const { DataTypes, Op, where } = require('sequelize')
 const session = require('express-session')
 const { isAuthenticated } = require ('./middlewares/auth.middleware')
 const crypto = require ('crypto')
+const { url } = require('inspector')
 
 const app = express()
 const port = 3000
@@ -55,6 +56,9 @@ const ShortUrl = sequelize.define(
             type: DataTypes.STRING,
             allowNull: false,
             unique: true
+        },
+        user: {
+            type: DataTypes.INTEGER
         }
     }
 )
@@ -203,13 +207,26 @@ function generateRandomString(length) {
 
 app.post('/', async(req, res) => {
     const { original_url } = req.body
-
     const key = generateUniqueString()
 
-    const ShortURL = ShortUrl.create({
-        url: original_url,
-        key
-    })
+    if(req.session.user) {
+        const user = await User.findOne({
+            where: {
+                username: req.session.user
+            }
+        })
+        await ShortUrl.create({
+            url: original_url,
+            key,
+            user: user.id
+        })
+    } else {
+        await ShortUrl.create({
+            url: original_url,
+            key,
+        })
+    }
+
     res.render('index', { key })
 })
 
@@ -275,6 +292,29 @@ app.post('/forget/:forget_key', async(req, res) => {
 } else {
     res.render('user/reset-password', { message: 'Password mismatched, check it again.'})
 }
+})
+
+app.get('/history', isAuthenticated, async(req, res) => {
+    const user = await User.findOne({
+        where: {
+            username: req.session.user
+        }
+    })
+    const history = await ShortUrl.findAll({
+        where: {
+            user: user.id
+        }
+    })
+    res.render('user/history', { items: history })
+})
+
+app.delete('/history/:id', isAuthenticated, async(req, res) => {
+    await ShortUrl.destroy({
+        where: {
+            id: req.params.id
+        }
+    })
+    res.send({ message: 'Item deleted successfully' })
 })
 
 app.listen(port, () => {
